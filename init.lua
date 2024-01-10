@@ -34,6 +34,7 @@ are first encountering a few different constructs in your nvim config.
 
 I hope you enjoy your Neovim journey,
 - TJ
+]]--
 
 -- Set <space> as the leader key
 -- See `:help mapleader`
@@ -44,6 +45,7 @@ vim.g.maplocalleader = ' '
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    https://github.com/folke/lazy.nvim
 --    `:help lazy.nvim.txt` for more info
+
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
 if not vim.loop.fs_stat(lazypath) then
   vim.fn.system {
@@ -418,7 +420,7 @@ vim.keymap.set('n', '<leader>sr', require('telescope.builtin').resume, { desc = 
 vim.defer_fn(function()
   require('nvim-treesitter.configs').setup {
     -- Add languages to be installed here that you want installed for treesitter
-    ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'bash' },
+    ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'bash', 'terraform', 'jsonnet' },
 
     -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
     auto_install = false,
@@ -689,6 +691,27 @@ require("tokyonight").setup({
 })
 
 vim.cmd[[colorscheme tokyonight-storm]]
+
+require'lspconfig'.jsonnet_ls.setup{
+	settings = {
+		ext_vars = {},
+		formatting = {
+			-- default values
+			Indent              = 2,
+			MaxBlankLines       = 2,
+			StringStyle         = 'single',
+			CommentStyle        = 'slash',
+			PrettyFieldNames    = true,
+			PadArrays           = false,
+			PadObjects          = true,
+			SortImports         = true,
+			UseImplicitPlus     = true,
+			StripEverything     = false,
+			StripComments       = false,
+			StripAllButComments = false,
+		},
+	},
+}
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
