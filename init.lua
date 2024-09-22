@@ -11,13 +11,16 @@ are first encountering a few different constructs in your nvim config.
 
 I hope you enjoy your Neovim journey,
 - TJ
-]]--
+]] --
 
 -- Set <space> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are required (otherwise wrong leader will be used)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
+
+-- Turn off logging for LSP
+vim.lsp.set_log_level("off")
 
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    https://github.com/folke/lazy.nvim
@@ -64,7 +67,7 @@ require('lazy').setup({
 
       -- Useful status updates for LSP
       -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
-      { 'j-hui/fidget.nvim', opts = {} },
+      { 'j-hui/fidget.nvim',       opts = {} },
 
       -- Additional lua configuration, makes nvim stuff amazing!
       'folke/neodev.nvim',
@@ -171,8 +174,8 @@ require('lazy').setup({
     priority = 1000,
     opts = {},
   },
-  
-  { "catppuccin/nvim", name = "catppuccin", priority = 1000 },
+
+  { "catppuccin/nvim",      name = "catppuccin", priority = 1000 },
 
   {
     -- Set lualine as statusline
@@ -379,7 +382,7 @@ end, { desc = '[/] Fuzzily search in current buffer' })
 local function telescope_live_grep_open_files()
   require('telescope.builtin').live_grep {
     grep_open_files = true,
-    prompt_title = 'Live Grep in Open Files',
+    proGmpt_title = 'Live Grep in Open Files',
   }
 end
 vim.keymap.set('n', '<leader>s/', telescope_live_grep_open_files, { desc = '[S]earch [/] in Open Files' })
@@ -399,10 +402,13 @@ vim.keymap.set('n', '<leader>sr', require('telescope.builtin').resume, { desc = 
 vim.defer_fn(function()
   require('nvim-treesitter.configs').setup {
     -- Add languages to be installed here that you want installed for treesitter
-    ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'bash', 'terraform', 'jsonnet' },
+    ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'bash', 'terraform', 'jsonnet'},
 
     -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
+    sync_install = false,
     auto_install = false,
+    ignore_install = {},
+    modules = {},
 
     highlight = { enable = true },
     indent = { enable = true },
@@ -508,22 +514,24 @@ local on_attach = function(_, bufnr)
 end
 
 -- document existing key chains
-require('which-key').register {
-  ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
-  ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
-  ['<leader>g'] = { name = '[G]it', _ = 'which_key_ignore' },
-  ['<leader>h'] = { name = 'Git [H]unk', _ = 'which_key_ignore' },
-  ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
-  ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
-  ['<leader>t'] = { name = '[T]oggle', _ = 'which_key_ignore' },
-  ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
-}
+local wk = require('which-key')
+wk.add({
+    { "<leader>g", group = "[G]it" },
+    { "<leader>w", group = "[W]orkspace" },
+    { "<leader>h", group = "Git [H]unk" },
+    { "<leader>d", group = "[D]ocument" },
+    { "<leader>c", group = "[C]ode" },
+    { "<leader>r", group = "[R]ename" },
+    { "<leader>s", group = "[S]earch" },
+    { "<leader>t", group = "[T]oggle" },
+})
+
 -- register which-key VISUAL mode
 -- required for visual <leader>hs (hunk stage) to work
-require('which-key').register({
-  ['<leader>'] = { name = 'VISUAL <leader>' },
-  ['<leader>h'] = { 'Git [H]unk' },
-}, { mode = 'v' })
+wk.add({
+    { "<leader>", group = "VISUAL <leader>", mode = "v" },
+    { "<leader>h", desc = "Git [H]unk", mode = "v" },
+  }, { mode = 'v' })
 
 -- mason-lspconfig requires that these setup functions are called in this order
 -- before setting up the servers.
@@ -539,12 +547,11 @@ require('mason-lspconfig').setup()
 --  If you want to override the default filetypes that your language server will attach to you can
 --  define the property 'filetypes' to the map in question.
 local servers = {
-  -- clangd = {},
-  -- gopls = {},
-  -- pyright = {},
-  -- rust_analyzer = {},
-  -- tsserver = {},
-  -- html = { filetypes = { 'html', 'twig', 'hbs'} },
+  clangd = {},
+  gopls = { gofumpt = true },
+  pyright = {},
+  rust_analyzer = {},
+  html = { filetypes = { 'html', 'twig', 'hbs' } },
 
   lua_ls = {
     Lua = {
@@ -634,78 +641,106 @@ cmp.setup {
 }
 
 require("catppuccin").setup({
-    flavour = "latte", -- latte, frappe, macchiato, mocha
-    background = { -- :h background
-        light = "latte",
-        dark = "mocha",
+  flavour = "latte",   -- latte, frappe, macchiato, mocha
+  background = {       -- :h background
+    light = "latte",
+    dark = "mocha",
+  },
+  transparent_background = true,   -- disables setting the background color.
+  show_end_of_buffer = false,      -- shows the '~' characters after the end of buffers
+  term_colors = false,             -- sets terminal colors (e.g. `g:terminal_color_0`)
+  dim_inactive = {
+    enabled = false,               -- dims the background color of inactive window
+    shade = "dark",
+    percentage = 0.15,             -- percentage of the shade to apply to the inactive window
+  },
+  no_italic = false,               -- Force no italic
+  no_bold = false,                 -- Force no bold
+  no_underline = false,            -- Force no underline
+  styles = {                       -- Handles the styles of general hi groups (see `:h highlight-args`):
+    comments = { "italic" },       -- Change the style of comments
+    conditionals = { "italic" },
+    loops = {},
+    functions = {},
+    keywords = {},
+    strings = {},
+    variables = {},
+    numbers = {},
+    booleans = {},
+    properties = {},
+    types = {},
+    operators = {},
+    -- miscs = {}, -- Uncomment to turn off hard-coded styles
+  },
+  color_overrides = {},
+  custom_highlights = {},
+  integrations = {
+    cmp = true,
+    gitsigns = true,
+    nvimtree = true,
+    treesitter = true,
+    notify = false,
+    mini = {
+      enabled = true,
+      indentscope_color = "",
     },
-    transparent_background = false, -- disables setting the background color.
-    show_end_of_buffer = false, -- shows the '~' characters after the end of buffers
-    term_colors = false, -- sets terminal colors (e.g. `g:terminal_color_0`)
-    dim_inactive = {
-        enabled = false, -- dims the background color of inactive window
-        shade = "dark",
-        percentage = 0.15, -- percentage of the shade to apply to the inactive window
-    },
-    no_italic = false, -- Force no italic
-    no_bold = false, -- Force no bold
-    no_underline = false, -- Force no underline
-    styles = { -- Handles the styles of general hi groups (see `:h highlight-args`):
-        comments = { "italic" }, -- Change the style of comments
-        conditionals = { "italic" },
-        loops = {},
-        functions = {},
-        keywords = {},
-        strings = {},
-        variables = {},
-        numbers = {},
-        booleans = {},
-        properties = {},
-        types = {},
-        operators = {},
-        -- miscs = {}, -- Uncomment to turn off hard-coded styles
-    },
-    color_overrides = {},
-    custom_highlights = {},
-    integrations = {
-        cmp = true,
-        gitsigns = true,
-        nvimtree = true,
-        treesitter = true,
-        notify = false,
-        mini = {
-            enabled = true,
-            indentscope_color = "",
-        },
-        -- For more plugins integrations please scroll down (https://github.com/catppuccin/nvim#integrations)
-    },
+    -- For more plugins integrations please scroll down (https://github.com/catppuccin/nvim#integrations)
+  },
 })
 
 vim.cmd.colorscheme "catppuccin"
 
-require'lspconfig'.jsonnet_ls.setup{
-	settings = {
-		ext_vars = {},
-		formatting = {
-			-- default values
-			Indent              = 2,
-			MaxBlankLines       = 2,
-			StringStyle         = 'single',
-			CommentStyle        = 'slash',
-			PrettyFieldNames    = true,
-			PadArrays           = false,
-			PadObjects          = true,
-			SortImports         = true,
-			UseImplicitPlus     = true,
-			StripEverything     = false,
-			StripComments       = false,
-			StripAllButComments = false,
-		},
-	},
+require 'lspconfig'.jsonnet_ls.setup {
+  settings = {
+    ext_vars = {},
+    formatting = {
+      -- default values
+      Indent              = 2,
+      MaxBlankLines       = 2,
+      StringStyle         = 'single',
+      CommentStyle        = 'slash',
+      PrettyFieldNames    = true,
+      PadArrays           = false,
+      PadObjects          = true,
+      SortImports         = true,
+      UseImplicitPlus     = true,
+      StripEverything     = false,
+      StripComments       = false,
+      StripAllButComments = false,
+    },
+  },
 }
 
 -- Relative line numbers
 vim.wo.relativenumber = true
 
+-- Make tabs 4 spaces
+vim.opt.tabstop = 4
+
+vim.g.markdown_recommended_style = 0
+
+-- Set show whitespace
+vim.opt.list = true
+
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
+
+
+-- Disable arrow keys in normal mode
+vim.api.nvim_set_keymap('n', '<Up>', '<NOP>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<Down>', '<NOP>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<Left>', '<NOP>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<Right>', '<NOP>', { noremap = true, silent = true })
+
+-- Disable arrow keys in insert mode
+vim.api.nvim_set_keymap('i', '<Up>', '<NOP>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('i', '<Down>', '<NOP>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('i', '<Left>', '<NOP>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('i', '<Right>', '<NOP>', { noremap = true, silent = true })
+
+-- Disable arrow keys in visual mode
+vim.api.nvim_set_keymap('v', '<Up>', '<NOP>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('v', '<Down>', '<NOP>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('v', '<Left>', '<NOP>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('v', '<Right>', '<NOP>', { noremap = true, silent = true })
+
