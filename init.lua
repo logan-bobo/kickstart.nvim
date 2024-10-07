@@ -169,13 +169,11 @@ require('lazy').setup({
   },
 
   {
-    "folke/tokyonight.nvim",
-    lazy = false,
+    -- Install catppuccin
+    "catppuccin/nvim",
+    name = "catppuccin",
     priority = 1000,
-    opts = {},
   },
-
-  { "catppuccin/nvim",      name = "catppuccin", priority = 1000 },
 
   {
     -- Set lualine as statusline
@@ -640,8 +638,9 @@ cmp.setup {
   },
 }
 
+-- Setup catppuccin
 require("catppuccin").setup({
-  flavour = "latte",   -- latte, frappe, macchiato, mocha
+  flavour = "mocha",   -- latte, frappe, macchiato, mocha
   background = {       -- :h background
     light = "latte",
     dark = "mocha",
