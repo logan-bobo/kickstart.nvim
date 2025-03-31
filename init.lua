@@ -90,6 +90,13 @@ require('lazy').setup({
       'rafamadriz/friendly-snippets',
     },
   },
+  {
+    "rust-lang/rust.vim",
+    ft = "rust",
+    init = function()
+      vim.g.rustfmt_autosave = 1
+    end
+  },
 
   -- Useful plugin to show you pending keybinds.
   { 'folke/which-key.nvim', opts = {} },
@@ -244,7 +251,7 @@ require('lazy').setup({
   --
   --    For additional information see: https://github.com/folke/lazy.nvim#-structuring-your-plugins
   -- { import = 'custom.plugins' },
-}, {})
+})
 
 -- [[ Setting options ]]
 -- See `:help vim.o`
@@ -409,6 +416,11 @@ vim.defer_fn(function()
     modules = {},
 
     highlight = { enable = true },
+    rainbow = {
+      enable = true,
+      extended_mode = true,
+      max_file_lines = nil,
+    },
     indent = { enable = true },
     incremental_selection = {
       enable = true,
@@ -573,6 +585,7 @@ local mason_lspconfig = require 'mason-lspconfig'
 
 mason_lspconfig.setup {
   ensure_installed = vim.tbl_keys(servers),
+  automatic_installation = true,
 }
 
 mason_lspconfig.setup_handlers {
@@ -683,7 +696,6 @@ require("catppuccin").setup({
       enabled = true,
       indentscope_color = "",
     },
-    -- For more plugins integrations please scroll down (https://github.com/catppuccin/nvim#integrations)
   },
 })
 
