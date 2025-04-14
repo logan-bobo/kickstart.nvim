@@ -97,6 +97,14 @@ require('lazy').setup({
       vim.g.rustfmt_autosave = 1
     end
   },
+  {
+    "fatih/vim-go",
+    ft = "go",
+    init = function()
+      vim.g.go_fmt_autosave = 1
+      vim.g.go_fmt_command = "gofumpt"  -- Use gofumpt instead of gofmt
+    end
+  },
 
   -- Useful plugin to show you pending keybinds.
   { 'folke/which-key.nvim', opts = {} },
